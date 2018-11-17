@@ -1,0 +1,17 @@
+
+/* General */
+.body {
+    font-family: Georgia;
+}
+
+/* Line chart */
+.line {
+    stroke: #091F2F;
+    fill: None;
+    stroke-width: 2;
+}
+
+.circle {
+    r: 5;
+    fill: #288BE4;
+}
