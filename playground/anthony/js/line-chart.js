@@ -1,7 +1,7 @@
 /*
  * Linechart - Object constructor function
- * @param _parentElement 	-- the HTML element in which to draw the line chart
- * @param _data	-- the data set
+ * @param _parentElement -- the HTML element in which to draw the line chart
+ * @param _data	-- the data
  */
 
 Linechart = function(_parentElement, _data) {
@@ -49,8 +49,15 @@ Linechart.prototype.initVis = function() {
     vis.yAxisGroup = vis.svg.append("g")
         .attr("class", "axis y-axis")
 
-    // Line
-    vis.linePath = vis.svg.append("path");
+    // Lines
+    vis.trendPath = vis.svg.append("path");
+    vis.policyPath = vis.svg.append("line");
+
+    // Tooltip
+    vis.tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0]);
+    vis.svg.call(vis.tip);
 
     // call wrangleData
     vis.wrangleData();
@@ -92,26 +99,38 @@ Linechart.prototype.updateVis = function() {
 	vis.xAxisGroup.call(vis.xAxis);
 	vis.yAxisGroup.transition().duration(3000).call(vis.yAxis);
 
-    // Draw path
-    vis.linePath.datum(vis.data)
-        .attr("class", "line")
+    // Draw paths
+    vis.trendPath.datum(vis.data)
+        .attr("class", "trend-line")
 		.transition()
 		.duration(2000)
         .attr("d", vis.line(vis.data));
 
-    // Circles
+    // can't figure out when the city began integrating Narcan into its response... AHOPE? October 2016?
+    vis.policyPath
+		.attr("class", "policy-line")
+		.attr("x1", vis.x(2016.1))
+        .attr("y1", 0)
+        .attr("x2", vis.x(2016.1))
+        .attr("y2", vis.height);
+
+    // Update tooltip
+    vis.tip.html(function(d) { return "<strong>" + d.first_or_second_half_of_year + "</strong>: " + d[vis.measure]; });
+
+    // Draw circles
     vis.circles = vis.svg.selectAll("circle")
         .data(vis.data);
     vis.circles.exit().remove();
     vis.circles.enter()
         .append("circle")
         .attr("class", "circle")
+		.attr("r", 5)
+.on("mouseover", vis.tip.show)
+        .on("mouseout", vis.tip.hide)
         .merge(vis.circles)
         .transition()
         .duration(3500)
         .attr("cx", function(d) { return vis.x(d.first_or_second_half_of_year); })
         .attr("cy", function(d) { return vis.y(d[vis.measure]); });
-
-    // Tooltips
 };
 

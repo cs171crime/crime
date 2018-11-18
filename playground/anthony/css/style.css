@@ -4,14 +4,37 @@
     font-family: Georgia;
 }
 
+h1 {
+    font-size: 40px;
+    text-align: center;
+}
+
 /* Line chart */
-.line {
+.trend-line {
     stroke: #091F2F;
     fill: None;
     stroke-width: 2;
 }
 
+.policy-line {
+    stroke: #F84D42;
+    fill: None;
+    stroke-width: 2;
+    stroke-dasharray: 2;
+}
+
 .circle {
-    r: 5;
     fill: #288BE4;
+}
+
+.circle:hover {
+    fill: #F84D42;
+}
+
+.d3-tip {
+    line-height: 1;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 2px;
 }
