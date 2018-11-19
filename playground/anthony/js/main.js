@@ -2,11 +2,15 @@
 // Create variables to store chart
 var linechart;
 
-d3.csv("data/NewUpdatedData/DrugsByHalfYear.csv", function(data) {
+// Date parsing
+var parseDate = d3.timeParse("%m/%Y");
+
+
+d3.csv("data/lineChartData.csv", function(data) {
 
     // Data processing
     data.forEach(function(d) {
-        d.first_or_second_half_of_year = +d.first_or_second_half_of_year;
+        d.date = parseDate(d.date);
         d.HeroinCrimes = +d.HeroinCrimes;
         d.WeedCrimes = +d.WeedCrimes;
         d.NumbNeedleReports = +d.NumbNeedleReports;

@@ -1,3 +1,8 @@
+
+var parseDate = d3.timeParse("%m/%Y");
+var formatDate = d3.timeFormat("%m/%Y");
+
+
 /*
  * Linechart - Object constructor function
  * @param _parentElement -- the HTML element in which to draw the line chart
@@ -9,7 +14,7 @@ Linechart = function(_parentElement, _data) {
 	this.data = _data;
 	this.measure = "HeroinCrimes";
 
-	this.initVis();
+    this.initVis();
 };
 
 
@@ -32,11 +37,8 @@ Linechart.prototype.initVis = function() {
         .attr("transform", "translate(" + vis.margin.left + "," + vis.margin.top + ")");
 
     // Axes
-	// Temporary until we fix date time thing
-    // vis.x = d3.scaleTime()
-    //     .range([0, vis.width]);
-	vis.x = d3.scaleLinear()
-		.range([0, vis.width]);
+    vis.x = d3.scaleTime()
+        .range([0, vis.width]);
     vis.y = d3.scaleLinear()
         .range([vis.height, 0]);
 
@@ -51,7 +53,16 @@ Linechart.prototype.initVis = function() {
 
     // Lines
     vis.trendPath = vis.svg.append("path");
-    vis.policyPath = vis.svg.append("line");
+    vis.policyPathAHOPE = vis.svg.append("line");
+    vis.policyPathBILL4056 = vis.svg.append("line");
+    vis.policyPathMARIJUANABALLOT = vis.svg.append("line");
+    vis.policyPathNEEDLEPICKUP = vis.svg.append("line"); // need to add this to the plot
+
+	// Line labels
+	vis.policyTextAHOPE = vis.svg.append("text")
+    vis.policyTextBILL4056 = vis.svg.append("text")
+    vis.policyTextMARIJUANABALLOT = vis.svg.append("text")
+    vis.policyTextNEEDLEPICKUP = vis.svg.append("text")
 
     // Tooltip
     vis.tip = d3.tip()
@@ -69,8 +80,8 @@ Linechart.prototype.wrangleData = function() {
 
 	// Update domains
 	vis.x.domain([
-		d3.min(vis.data, function(d) { return d.first_or_second_half_of_year; }),
-		d3.max(vis.data, function(d) { return d.first_or_second_half_of_year; })
+		d3.min(vis.data, function(d) { return d.date; }),
+		d3.max(vis.data, function(d) { return d.date; })
 	]);
     vis.y.domain([
         d3.min(vis.data, function(d) { return d[vis.measure]; }),
@@ -84,7 +95,7 @@ Linechart.prototype.wrangleData = function() {
 	// Create path generator
     vis.line = d3.line()
         .curve(d3.curveMonotoneX)
-        .x(function(d) { return vis.x(d.first_or_second_half_of_year); })
+        .x(function(d) { return vis.x(d.date); })
         .y(function(d) { return vis.y(d[vis.measure]); });
 
 	// call updateVis
@@ -106,16 +117,45 @@ Linechart.prototype.updateVis = function() {
 		.duration(2000)
         .attr("d", vis.line(vis.data));
 
-    // can't figure out when the city began integrating Narcan into its response... AHOPE? October 2016?
-    vis.policyPath
+    // TO ADD
+	// if statements to draw and label line for the policy based on selected measure
+	//
+
+	// AHOPE - Oct 2016
+    vis.policyPathAHOPE
 		.attr("class", "policy-line")
-		.attr("x1", vis.x(2016.1))
+		.attr("x1", vis.x(parseDate("10/2016")))
         .attr("y1", 0)
-        .attr("x2", vis.x(2016.1))
+        .attr("x2", vis.x(parseDate("10/2016")))
+        .attr("y2", vis.height);
+	// vis.policyTextAHOPE
+	// 	.attr("class", "policy-text")
+    //     .attr("x", vis.x(parseDate("10/2016")))
+    //     .attr("y", 0)
+	// 	.text("AHOPE created")
+
+
+    // Bill H.4056 (An Act relative to substance use, treatment, education and prevention) -- March 2016
+    vis.policyPathBILL4056
+        .attr("class", "policy-line")
+        .attr("x1", vis.x(parseDate("03/2016")))
+        .attr("y1", 0)
+        .attr("x2", vis.x(parseDate("03/2016")))
         .attr("y2", vis.height);
 
+    // Recreational marijuana - Dec 2016
+    vis.policyPathMARIJUANABALLOT
+        .attr("class", "policy-line")
+        .attr("x1", vis.x(parseDate("12/2016")))
+        .attr("y1", 0)
+        .attr("x2", vis.x(parseDate("12/2016")))
+        .attr("y2", vis.height);
+
+    // Needle pickup
+
+
     // Update tooltip
-    vis.tip.html(function(d) { return "<strong>" + d.first_or_second_half_of_year + "</strong>: " + d[vis.measure]; });
+    vis.tip.html(function(d) { return "<strong>" + formatDate(d.date) + "</strong>: " + d[vis.measure]; });
 
     // Draw circles
     vis.circles = vis.svg.selectAll("circle")
@@ -124,13 +164,13 @@ Linechart.prototype.updateVis = function() {
     vis.circles.enter()
         .append("circle")
         .attr("class", "circle")
-		.attr("r", 5)
+		.attr("r", 4.5)
 .on("mouseover", vis.tip.show)
         .on("mouseout", vis.tip.hide)
         .merge(vis.circles)
         .transition()
         .duration(3500)
-        .attr("cx", function(d) { return vis.x(d.first_or_second_half_of_year); })
+        .attr("cx", function(d) { return vis.x(d.date); })
         .attr("cy", function(d) { return vis.y(d[vis.measure]); });
 };
 
